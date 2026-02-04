@@ -25,6 +25,27 @@ tab1, tab2, tab3 = st.tabs([
     "🔎 Mașini Similare RO",
     "📬 Rezumat Zilnic"
 ])
+# ---------------- PASSWORD PROTECTION ----------------
+def check_password():
+    def password_entered():
+        if st.session_state["password"] == st.secrets["DASHBOARD_PASSWORD"]:
+            st.session_state["authenticated"] = True
+        else:
+            st.session_state["authenticated"] = False
+
+    if "authenticated" not in st.session_state:
+        st.text_input("Introdu parola:", type="password", on_change=password_entered, key="password")
+        return False
+    elif not st.session_state["authenticated"]:
+        st.text_input("Introdu parola:", type="password", on_change=password_entered, key="password")
+        st.error("Parola greșită")
+        return False
+    else:
+        return True
+
+if not check_password():
+    st.stop()
+# ---------------- PASSWORD PROTECTION END ----------------
 
 # ---------- TAB 1: Evoluție Prețuri ----------
 with tab1:
