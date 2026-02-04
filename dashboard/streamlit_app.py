@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.express as px
 import os
 
-# ---------------- PASSWORD PROTECTION ----------------
+# ---------------- PASSWORD ----------------
 def check_password():
     def password_entered():
         if st.session_state["password"] == st.secrets["DASHBOARD_PASSWORD"]:
@@ -26,17 +26,13 @@ if not check_password():
     st.stop()
 # ---------------- PASSWORD END ----------------
 
-# ---------------- DATABASE FUNCTION ----------------
+# ---------------- DATABASE ----------------
 def get_db_connection():
-    # Creează folder database dacă nu există
     if not os.path.exists("database"):
         os.makedirs("database")
 
-    # Conectare SQLite
     conn = sqlite3.connect("database/cars.db", check_same_thread=False)
     c = conn.cursor()
-
-    # Creare tabel dacă nu există
     c.execute('''
         CREATE TABLE IF NOT EXISTS cars (
             id INTEGER PRIMARY KEY,
@@ -50,7 +46,7 @@ def get_db_connection():
     ''')
     conn.commit()
 
-    # Adaugă date sample dacă tabela e goală
+    # Date sample dacă tabela e goală
     df_check = pd.read_sql_query("SELECT * FROM cars", conn)
     if df_check.empty:
         sample_data = [
@@ -65,27 +61,37 @@ def get_db_connection():
         conn.commit()
 
     return conn
+# ---------------- END DATABASE ----------------
 
-# ---------------- MAIN FUNCTION ----------------
+# ---------------- MAIN ----------------
 def main():
     conn = get_db_connection()
     df = pd.read_sql_query("SELECT * FROM cars", conn)
 
     # Sidebar: selectare model favorit
-    models = df['make'] + ' ' + df['model']
-    models = models.unique().tolist()
+    models = (df['make'] + ' ' + df['model']).unique().tolist()
     favorite_model = st.sidebar.selectbox("Selectează model favorit", models)
 
     df_model = df[df['make'] + ' ' + df['model'] == favorite_model]
 
     # ---------------- TABURI ----------------
-    tab1, tab2 = st.tabs(["Evoluție preț", "Date brute"])
+    tab1, tab2, tab3 = st.tabs(["Evoluție preț", "Date brute", "Mașini similare"])
 
+    # Tab 1: Grafic evoluție
     with tab1:
         st.header(f"Evoluția prețului pentru {favorite_model}")
         fig = px.line(df_model, x='date', y='price', title=f'{favorite_model} – Evoluția prețului')
         st.plotly_chart(fig)
 
+    # Tab 2: Tabel date brute
     with tab2:
         st.subheader("Date brute")
         st.dataframe(df_model)
+
+    # Tab 3: Placeholder mașini similare OLX/Autovit
+    with tab3:
+        st.subheader("Mașini similare (OLX / Autovit)")
+        st.info("Aici vor apărea mașinile similare în viitoarea integrare.")
+
+if __name__ == "__main__":
+    main()
