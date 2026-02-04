@@ -78,12 +78,14 @@ def main():
 
     df_model = df[df['make'] + ' ' + df['model'] == favorite_model]
 
-    st.header(f"Evoluția prețului pentru {favorite_model}")
-    fig = px.line(df_model, x='date', y='price', title=f'{favorite_model} – Evoluția prețului')
-    st.plotly_chart(fig)
+    # ---------------- TABURI ----------------
+    tab1, tab2 = st.tabs(["Evoluție preț", "Date brute"])
 
-    st.subheader("Date brute")
-    st.dataframe(df_model)
+    with tab1:
+        st.header(f"Evoluția prețului pentru {favorite_model}")
+        fig = px.line(df_model, x='date', y='price', title=f'{favorite_model} – Evoluția prețului')
+        st.plotly_chart(fig)
 
-if __name__ == "__main__":
-    main()
+    with tab2:
+        st.subheader("Date brute")
+        st.dataframe(df_model)
