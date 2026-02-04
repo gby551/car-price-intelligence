@@ -1,0 +1,21 @@
+# Scraping
+playwright==1.44.0
+
+# Browser support pentru Playwright
+pyppeteer==1.0.2
+
+# Dashboard
+streamlit==1.28.0
+plotly==5.17.0  # pentru grafice interactive
+
+# Bază de date
+sqlite3  # inclus implicit în Python
+
+# Email
+secure-smtplib==0.1.3  # pentru Gmail SMTP sigur
+email-validator==2.1.0  # optional, verificare adrese
+
+# Alte utilitare
+pandas==2.1.1  # pentru manipulare date
+numpy==1.26.2  # pentru calcule statistice
+python-dotenv==1.0.0  # pentru variabile de mediu (cookies, Gmail)
