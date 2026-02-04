@@ -104,3 +104,45 @@ with tab3:
     st.table(df_email_summary)
 
     st.info("Emailul zilnic va conține aceleași informații ca tabelul de mai sus, cu statistici și oportunități.")
+import sqlite3
+import pandas as pd
+# Citire date din baza de date
+df = pd.read_sql_query("SELECT * FROM cars", conn)
+
+# Filtrăm după model preferat (exemplu)
+favorite_model = 'BMW 320i'
+df_model = df[df['make'] + ' ' + df['model'] == favorite_model]
+
+import plotly.express as px
+
+# Grafic evoluție preț
+fig = px.line(df_model, x='date', y='price', title=f'Evoluția prețului pentru {favorite_model}')
+st.plotly_chart(fig)
+
+# Conectare la baza de date
+conn = sqlite3.connect('database/cars.db')
+c = conn.cursor()
+
+# Creare tabel dacă nu există
+c.execute('''
+CREATE TABLE IF NOT EXISTS cars (
+    id INTEGER PRIMARY KEY,
+    make TEXT,
+    model TEXT,
+    year INTEGER,
+    mileage INTEGER,
+    price REAL,
+    date TEXT
+)
+''')
+sample_data = [
+    ('BMW', '320i', 2018, 50000, 18000, '2026-02-01'),
+    ('BMW', '320i', 2018, 50000, 17800, '2026-02-02'),
+    ('BMW', '320i', 2018, 50000, 17500, '2026-02-03'),
+]
+
+c.executemany('''
+INSERT INTO cars (make, model, year, mileage, price, date)
+VALUES (?, ?, ?, ?, ?, ?)
+''', sample_data)
+conn.commit()
