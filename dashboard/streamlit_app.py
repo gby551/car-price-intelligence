@@ -45,21 +45,6 @@ def get_db_connection():
         )
     ''')
     conn.commit()
-
-    # Date sample dacă tabela e goală
-    df_check = pd.read_sql_query("SELECT * FROM cars", conn)
-    if df_check.empty:
-        sample_data = [
-            ('BMW', '320i', 2018, 50000, 18000, '2026-02-01'),
-            ('BMW', '320i', 2018, 50000, 17800, '2026-02-02'),
-            ('BMW', '320i', 2018, 50000, 17500, '2026-02-03'),
-        ]
-        c.executemany('''
-            INSERT INTO cars (make, model, year, mileage, price, date)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', sample_data)
-        conn.commit()
-
     return conn
 # ---------------- END DATABASE ----------------
 
@@ -67,6 +52,10 @@ def get_db_connection():
 def main():
     conn = get_db_connection()
     df = pd.read_sql_query("SELECT * FROM cars", conn)
+
+    if df.empty:
+        st.warning("Baza de date este goală. Rulează scraper-ul pentru a aduce prețurile reale.")
+        st.stop()
 
     # Sidebar: selectare model favorit
     models = (df['make'] + ' ' + df['model']).unique().tolist()
