@@ -1,9 +1,8 @@
 name: Mobile.de Daily Scraper
 
-on:
+workflow_dispatch:
   schedule:
-    - cron: '0 2 * * *' # Rulează zilnic la ora 02:00 AM
-  workflow_dispatch: # Permite pornirea manuală din interfața GitHub
+    - cron: '0 2 * * *'
 
 jobs:
   build:
