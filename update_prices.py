@@ -25,34 +25,34 @@ def get_db_connection():
     return conn
 
 def scrape_dealer(url, label):
+    # Simulăm un browser real de pe un Mac
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
-        "Accept-Language": "en-US,en;q=0.9"
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "Accept-Language": "ro-RO,ro;q=0.9,en-US;q=0.8,en;q=0.7",
+        "Accept-Encoding": "gzip, deflate, br",
+        "DNT": "1",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
     }
+    
+    # Adăugăm un delay generos și aleatoriu
+    time.sleep(random.uniform(5, 12))
+    
     try:
-        # Adăugăm un mic delay să nu fim blocați de la prima cerere
-        time.sleep(random.uniform(2, 4))
-        response = requests.get(url, headers=headers, timeout=20)
+        # Folosim un Session pentru a păstra Cookie-urile
+        session = requests.Session()
+        response = session.get(url, headers=headers, timeout=30)
         
-        if response.status_code != 200:
-            print(f"Eroare {response.status_code} la {label}")
+        if response.status_code == 403:
+            print(f"Bust! 403 Forbidden pentru {label}. Mobile.de ne-a blocat.")
             return []
-
-        soup = BeautifulSoup(response.text, "html.parser")
-        listings = []
-        # Mobile.de listări
-        articles = soup.find_all("article", {"data-ad-id": True})
-        
-        for article in articles:
-            ad_id = article.get("data-ad-id")
-            price_tag = article.find("span", {"data-testid": "price-label"})
-            if ad_id and price_tag:
-                price = int(''.join(filter(str.isdigit, price_tag.get_text())))
-                listings.append({"ad_id": ad_id, "price": price})
-        return listings
-    except Exception as e:
-        print(f"Eroare scraping {label}: {e}")
-        return []
+            
+        # ... restul codului de parsing (BeautifulSoup) rămâne la fel
 
 def main():
     target_links = [
