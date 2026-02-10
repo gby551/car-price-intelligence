@@ -1,7 +1,7 @@
 name: Mobile.de Daily Scraper
 
 workflow_dispatch:
-  schedule:
+schedule:
     - cron: '0 2 * * *'
 
 jobs:
