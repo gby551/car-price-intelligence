@@ -7,8 +7,28 @@ import os
 # ... (partea de password rămâne neschimbată) ...
 
 def get_db_connection():
-    # Folosim check_same_thread=False pentru Streamlit
-    conn = sqlite3.connect("database/cars.db", check_same_thread=False)
+    conn = sqlite3.connect("database/cars.db")
+    c = conn.cursor()
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS cars (
+            ad_id TEXT PRIMARY KEY,
+            make TEXT,
+            model TEXT,
+            price REAL,
+            first_seen TEXT,
+            last_seen TEXT,
+            status TEXT DEFAULT 'active'
+        )
+    ''')
+    # Tabel separat pentru istoricul de preț (dacă o mașină se ieftinește în timp)
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS price_history (
+            ad_id TEXT,
+            price REAL,
+            date TEXT
+        )
+    ''')
+    conn.commit()
     return conn
 
 def main():
