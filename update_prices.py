@@ -8,7 +8,7 @@ import random
 import os
 import sys
 
-# Căi absolute pentru GitHub Actions
+# Căi absolute pentru a evita erorile pe mediul Linux GitHub
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_DIR = os.path.join(BASE_DIR, "database")
 DB_PATH = os.path.join(DB_DIR, "cars.db")
@@ -31,6 +31,7 @@ def scrape_dealer(url, label):
         "Referer": "https://www.google.com"
     }
     try:
+        # Pauză strategică pentru a evita detectarea ca bot
         time.sleep(random.uniform(5, 10))
         response = requests.get(url, headers=headers, timeout=30)
         if response.status_code != 200:
@@ -45,11 +46,12 @@ def scrape_dealer(url, label):
             ad_id = article.get("data-ad-id")
             price_tag = article.find("span", {"data-testid": "price-label"})
             if ad_id and price_tag:
-                price = int(''.join(filter(str.isdigit, price_tag.get_text())))
+                price_text = price_tag.get_text()
+                price = int(''.join(filter(str.isdigit, price_text)))
                 listings.append({"ad_id": ad_id, "price": price})
         return listings
     except Exception as e:
-        print(f"Eroare la {label}: {e}")
+        print(f"Eroare la scraping {label}: {e}")
         return []
 
 def update_database(make, model, listings):
@@ -69,6 +71,7 @@ def update_database(make, model, listings):
             c.execute("INSERT INTO cars (ad_id, make, model, price, first_seen, last_seen, status) VALUES (?, ?, ?, ?, ?, ?, ?)", 
                       (item['ad_id'], make, model, item['price'], today, today, 'active'))
 
+    # Marcăm mașinile care nu mai sunt în link-uri ca fiind 'sold'
     placeholders = ', '.join(['?'] * len(found_ids))
     c.execute(f"UPDATE cars SET status = 'sold' WHERE model = ? AND status = 'active' AND ad_id NOT IN ({placeholders})", 
               (model, *found_ids))
@@ -87,9 +90,9 @@ def main():
         data = scrape_dealer(target['url'], target['label'])
         if data:
             update_database("Dealer", target['label'], data)
-            print(f"Succes: {len(data)} anunțuri.")
+            print(f"Succes: {len(data)} anunțuri găsite.")
         else:
-            print(f"Nu s-au extras date.")
+            print(f"Nu s-au extras date pentru {target['label']}.")
 
 if __name__ == "__main__":
     main()
