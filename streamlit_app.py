@@ -37,8 +37,7 @@ def main():
     conn = get_db_connection()
     # Citim datele și convertim coloana date la format datetime
     df = pd.read_sql_query("SELECT * FROM cars", conn)
-    df['date'] = pd.to_datetime(df['date'])
-
+    df['last_seen'] = pd.to_datetime(df['last_seen'])
     if df.empty:
         st.warning("Baza de date este goală.")
         st.stop()
