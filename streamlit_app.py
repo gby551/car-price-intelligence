@@ -85,8 +85,8 @@ def main():
         # Adăugăm un filtru de sortare
         st.dataframe(df_model.sort_values('date', ascending=False), use_container_width=True)
 
-   with tab3:
-    st.header("Analiză Timp de Vânzare")
+    with tab3:
+        st.header("Analiză Timp de Vânzare")
     
     # Filtrăm doar mașinile care au statusul 'sold'
     df_sold = df_model[df_model['status'] == 'sold'].copy()
