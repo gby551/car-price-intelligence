@@ -85,10 +85,27 @@ def main():
         # Adăugăm un filtru de sortare
         st.dataframe(df_model.sort_values('date', ascending=False), use_container_width=True)
 
-    with tab3:
-        st.subheader("Statistici de Vânzare (Estimat)")
-        # Aici poți calcula diferența dintre prețul de listă și cel la care a dispărut
-        st.info("Logica de detectare 'SOLD' va afișa aici prețul final de listare al mașinilor care au dispărut de pe site.")
+   with tab3:
+    st.header("Analiză Timp de Vânzare")
+    
+    # Filtrăm doar mașinile care au statusul 'sold'
+    df_sold = df_model[df_model['status'] == 'sold'].copy()
+    
+    if not df_sold.empty:
+        # Calculăm diferența în zile
+        df_sold['first_seen'] = pd.to_datetime(df_sold['first_seen'])
+        df_sold['last_seen'] = pd.to_datetime(df_sold['last_seen'])
+        df_sold['days_on_market'] = (df_sold['last_seen'] - df_sold['first_seen']).dt.days
+        
+        avg_days = df_sold['days_on_market'].mean()
+        st.metric("Timp mediu de vânzare", f"{avg_days:.1f} zile")
+        
+        fig_days = px.bar(df_sold, x='ad_id', y='days_on_market', 
+                          title="Zile pe piață per anunț",
+                          labels={'days_on_market': 'Zile', 'ad_id': 'ID Anunț'})
+        st.plotly_chart(fig_days, use_container_width=True)
+    else:
+        st.info("Nu există suficiente date despre mașini vândute pentru a calcula statistici.")
 
 if __name__ == "__main__":
     main()
