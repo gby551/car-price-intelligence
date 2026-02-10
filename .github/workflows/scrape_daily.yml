@@ -1,1 +1,35 @@
+name: Mobile.de Daily Scraper
 
+on:
+  schedule:
+    - cron: '0 2 * * *' # Rulează zilnic la ora 02:00 AM
+  workflow_dispatch: # Permite pornirea manuală din interfața GitHub
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4 pandas sqlite3
+
+      - name: Run scraper
+        run: python update_prices.py
+
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name "GitHub Action Bot"
+          git config --global user.email "actions@github.com"
+          git add database/cars.db
+          git commit -m "Update car database: $(date)" || echo "No changes to commit"
+          git push
